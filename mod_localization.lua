@@ -21,7 +21,7 @@ module:add_localization_string("es_loc_apartment_environment", {
 })
 
 module:add_localization_string("es_loc_bridge_environment", {
-	english = "Green Bridge Environment (rain not included)",
+	english = "Green Bridge Environment",
 })
 
 module:add_localization_string("es_loc_diamond_heist_environment", {
