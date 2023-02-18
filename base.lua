@@ -9,20 +9,4 @@ local module = DMod:new("environment_selector", {
 
 module:hook_post_require("lib/setups/gamesetup", "lua/gamesetup")
 
-for _, package in pairs({
-	"levels/apartment/world",
-	"levels/bank/world",
-	"levels/bridge/world",
-	"levels/diamondheist/world",
-	"levels/l4d/world",
-	"levels/secret_stash/world",
-	"levels/slaughterhouse/world",
-	"levels/street/world",
-	"levels/suburbia/world",
-}) do
-	if PackageManager:loaded(package) then
-		PackageManager:unload(package)
-	end
-end
-
 return module

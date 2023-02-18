@@ -1,7 +1,8 @@
 local module = ... or D:module("environment_selector")
 
 local GameSetup = module:hook_class("GameSetup")
-module:post_hook(50, GameSetup, "init_finalize", function(self)
+
+module:post_hook(50, GameSetup, "load_packages", function(self)
 	local level_id = Global.game_settings.level_id or "bank"
 	local env_conf = D:conf("environment_selector_" .. level_id) or "bank"
 	if env_conf == "default" then
@@ -42,6 +43,34 @@ module:post_hook(50, GameSetup, "init_finalize", function(self)
 		PackageManager:load(selected_package)
 	end
 
+	self._selected_env = env_conf
+end)
+
+module:post_hook(50, GameSetup, "unload_packages", function(self)
+	for _, package in pairs({
+		"levels/apartment/world",
+		"levels/bank/world",
+		"levels/bridge/world",
+		"levels/diamondheist/world",
+		"levels/l4d/world",
+		"levels/secret_stash/world",
+		"levels/slaughterhouse/world",
+		"levels/street/world",
+		"levels/suburbia/world",
+	}) do
+		if PackageManager:loaded(package) then
+			PackageManager:unload(package)
+		end
+	end
+end)
+
+module:post_hook(50, GameSetup, "init_finalize", function(self)
+	local level_id = Global.game_settings.level_id or "bank"
+	local env_conf = D:conf("environment_selector_" .. level_id) or "bank"
+	if env_conf == "default" then
+		return
+	end
+
 	local environments = {
 		["bank"] = "environments/env_bank/env_bank",
 		["street"] = "environments/env_street/env_street",
@@ -54,7 +83,7 @@ module:post_hook(50, GameSetup, "init_finalize", function(self)
 		["hospital"] = "environments/env_l4d/env_l4d",
 	}
 
-	local env_name = environments[env_conf]
+	local env_name = environments[self._selected_env]
 	managers.viewport:preload_environment(env_name)
 	managers.environment_area:set_default_environment(env_name, nil, nil)
 end)
