@@ -2,7 +2,7 @@ local module = ... or D:module("environment_selector")
 
 local GameSetup = module:hook_class("GameSetup")
 
-module:post_hook(50, GameSetup, "load_packages", function(self)
+module:post_hook(50, GameSetup, "init_finalize", function(self)
 	local level_id = Global.game_settings.level_id or "bank"
 	local env_conf = D:conf("environment_selector_" .. level_id) or "bank"
 	if env_conf == "default" then
@@ -25,6 +25,10 @@ module:post_hook(50, GameSetup, "load_packages", function(self)
 		env_conf = level_list[math.random(1, #level_list)] or "bank"
 	end
 
+	if env_conf == level_id then
+		return
+	end
+
 	local packages = {
 		["bank"] = "levels/bank/world",
 		["apartment"] = "levels/apartment/world",
@@ -43,7 +47,22 @@ module:post_hook(50, GameSetup, "load_packages", function(self)
 		PackageManager:load(selected_package)
 	end
 
-	self._selected_env = env_conf
+	--* apply environment
+	local environments = {
+		["bank"] = "environments/env_bank/env_bank",
+		["street"] = "environments/env_street/env_street",
+		["apartment"] = "environments/env_apartment/env_apartment",
+		["bridge"] = "environments/env_bridge2/env_bridge2",
+		["diamond_heist"] = "environments/env_diamond2/env_diamond2",
+		["slaughter_house"] = "environments/env_slaughterhouse/env_slaughterhouse",
+		["suburbia"] = "environments/env_suburbia/env_suburbia",
+		["secret_stash"] = "environments/env_undercover/env_undercover",
+		["hospital"] = "environments/env_l4d/env_l4d",
+	}
+
+	local env_name = environments[env_conf]
+	managers.viewport:preload_environment(env_name)
+	managers.environment_area:set_default_environment(env_name, nil, nil)
 end)
 
 module:post_hook(50, GameSetup, "unload_packages", function(self)
@@ -62,28 +81,4 @@ module:post_hook(50, GameSetup, "unload_packages", function(self)
 			PackageManager:unload(package)
 		end
 	end
-end)
-
-module:post_hook(50, GameSetup, "init_finalize", function(self)
-	local level_id = Global.game_settings.level_id or "bank"
-	local env_conf = D:conf("environment_selector_" .. level_id) or "bank"
-	if env_conf == "default" then
-		return
-	end
-
-	local environments = {
-		["bank"] = "environments/env_bank/env_bank",
-		["street"] = "environments/env_street/env_street",
-		["apartment"] = "environments/env_apartment/env_apartment",
-		["bridge"] = "environments/env_bridge2/env_bridge2",
-		["diamond_heist"] = "environments/env_diamond2/env_diamond2",
-		["slaughter_house"] = "environments/env_slaughterhouse/env_slaughterhouse",
-		["suburbia"] = "environments/env_suburbia/env_suburbia",
-		["secret_stash"] = "environments/env_undercover/env_undercover",
-		["hospital"] = "environments/env_l4d/env_l4d",
-	}
-
-	local env_name = environments[self._selected_env]
-	managers.viewport:preload_environment(env_name)
-	managers.environment_area:set_default_environment(env_name, nil, nil)
 end)
