@@ -56,6 +56,6 @@ for _, level in pairs(levels) do
 	})
 	module:add_localization_string("es_loc_lightning_on_" .. level, {
 		english = string.format("Lightnings on %s", level_names["english"][level]),
-		french = string.format("Lumières sur %s", level_names["english"][level]),		
+		french = string.format("Éclairs sur %s", level_names["english"][level]),		
 	})
 end
