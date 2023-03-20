@@ -1,7 +1,5 @@
 local module = ... or D:module("environment_selector")
 
--- module:add_config_option("ss_selected_character", "default")
-
 local levels = {
 	"bank",
 	"heat_street",
@@ -17,6 +15,8 @@ local levels = {
 -- menu nodes
 for _, level in pairs(levels) do
 	module:add_config_option("environment_selector_" .. level, "default")
+	module:add_config_option("environment_selector_" .. level .. "_rain", level == "bridge")
+	module:add_config_option("environment_selector_" .. level .. "_lightning", level == "bridge")
 
 	module:add_menu_option("environment_selector_" .. level, {
 		type = "multi_choice",
@@ -35,5 +35,18 @@ for _, level in pairs(levels) do
 			{ "hospital", "es_loc_hospital_environment" },
 		},
 		default_value = "default",
+	})
+
+	module:add_menu_option("environment_selector_" .. level .. "_rain", {
+		type = "boolean",
+		text_id = "es_loc_rain_on_" .. level,
+	})
+	module:add_menu_option("environment_selector_" .. level .. "_lightning", {
+		type = "boolean",
+		text_id = "es_loc_lightning_on_" .. level,
+	})
+	module:add_menu_option("environment_selector_" .. level .. "divider", {
+		type = "divider",
+		size = 15,
 	})
 end

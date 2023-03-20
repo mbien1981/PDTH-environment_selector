@@ -2,6 +2,15 @@ local module = ... or D:module("environment_selector")
 
 local GameSetup = module:hook_class("GameSetup")
 
+module:post_hook(50, GameSetup, "load_packages", function(self)
+	local level_id = Global.game_settings.level_id or "bank"
+	if next(tweak_data.levels[level_id].environment_effects or {}) then
+		if not PackageManager:loaded("packages/level_bridge") then
+			PackageManager:load("packages/level_bridge")
+		end
+	end
+end)
+
 module:post_hook(50, GameSetup, "init_finalize", function(self)
 	local level_id = Global.game_settings.level_id or "bank"
 	local env_conf = D:conf("environment_selector_" .. level_id) or "bank"
@@ -11,7 +20,7 @@ module:post_hook(50, GameSetup, "init_finalize", function(self)
 
 	local level_list = {
 		"bank",
-		"street",
+		"heat_street",
 		"apartment",
 		"bridge",
 		"diamond_heist",
@@ -32,7 +41,7 @@ module:post_hook(50, GameSetup, "init_finalize", function(self)
 	local packages = {
 		["bank"] = "levels/bank/world",
 		["apartment"] = "levels/apartment/world",
-		["street"] = "levels/street/world",
+		["heat_street"] = "levels/street/world",
 		["bridge"] = "levels/bridge/world",
 		["diamond_heist"] = "levels/diamondheist/world",
 		["slaughter_house"] = "levels/slaughterhouse/world",
@@ -50,7 +59,7 @@ module:post_hook(50, GameSetup, "init_finalize", function(self)
 	--* apply environment
 	local environments = {
 		["bank"] = "environments/env_bank/env_bank",
-		["street"] = "environments/env_street/env_street",
+		["heat_street"] = "environments/env_street/env_street",
 		["apartment"] = "environments/env_apartment/env_apartment",
 		["bridge"] = "environments/env_bridge2/env_bridge2",
 		["diamond_heist"] = "environments/env_diamond2/env_diamond2",
@@ -76,6 +85,7 @@ module:post_hook(50, GameSetup, "unload_packages", function(self)
 		"levels/slaughterhouse/world",
 		"levels/street/world",
 		"levels/suburbia/world",
+		"packages/level_bridge",
 	}) do
 		if PackageManager:loaded(package) then
 			PackageManager:unload(package)

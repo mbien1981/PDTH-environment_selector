@@ -8,5 +8,6 @@ local module = DMod:new("environment_selector", {
 })
 
 module:hook_post_require("lib/setups/gamesetup", "lua/gamesetup")
+module:hook_post_require("lib/tweak_data/levelstweakdata", "lua/levelstweakdata")
 
 return module

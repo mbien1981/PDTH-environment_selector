@@ -8,38 +8,52 @@ module:add_localization_string("es_loc_random_environment", {
 	english = "Random Environment",
 })
 
-module:add_localization_string("es_loc_bank_environment", {
-	english = "FWB Environment",
-})
 
-module:add_localization_string("es_loc_heat_street_environment", {
-	english = "Heat Street Environment",
-})
+local levels = {
+	"bank",
+	"heat_street",
+	"apartment",
+	"bridge",
+	"diamond_heist",
+	"slaughter_house",
+	"suburbia",
+	"secret_stash",
+	"hospital",
+}
+local level_names = {
+	english = {
+		["bank"] = "First World Bank",
+		["heat_street"] = "Heat Street",
+		["apartment"] = "Panic Room",
+		["bridge"] = "Green Bridge",
+		["diamond_heist"] = "Diamond Heist",
+		["slaughter_house"] = "Slaughter House",
+		["suburbia"] = "Counterfeit",
+		["secret_stash"] = "Undercover",
+		["hospital"] = "No Mercy",
+	},
+	french = {
+		["bank"] = "First World Bank",
+		["heat_street"] = "Heat Street",
+		["apartment"] = "Panic Room",
+		["bridge"] = "Green Bridge",
+		["diamond_heist"] = "Diamond Heist",
+		["slaughter_house"] = "Slaughter House",
+		["suburbia"] = "Counterfeit",
+		["secret_stash"] = "Undercover",
+		["hospital"] = "No Mercy",
+	},
+}
 
-module:add_localization_string("es_loc_apartment_environment", {
-	english = "Panic Room Environment",
-})
+for _, level in pairs(levels) do
+	module:add_localization_string("es_loc_" .. level .. "_environment", {
+		english = string.format("%s Environment", level_names["english"][level]),
+	})
 
-module:add_localization_string("es_loc_bridge_environment", {
-	english = "Green Bridge Environment",
-})
-
-module:add_localization_string("es_loc_diamond_heist_environment", {
-	english = "Diamond Heist Environment",
-})
-
-module:add_localization_string("es_loc_slaughter_house_environment", {
-	english = "Slaughterhouse Environment",
-})
-
-module:add_localization_string("es_loc_suburbia_environment", {
-	english = "Counterfeit Environment",
-})
-
-module:add_localization_string("es_loc_secret_stash_environment", {
-	english = "Undercover Environment",
-})
-
-module:add_localization_string("es_loc_hospital_environment", {
-	english = "No Mercy Environment",
-})
+	module:add_localization_string("es_loc_rain_on_" .. level, {
+		english = string.format("Rain on %s", level_names["english"][level]),
+	})
+	module:add_localization_string("es_loc_lightning_on_" .. level, {
+		english = string.format("Lightnings on %s", level_names["english"][level]),
+	})
+end
