@@ -5,8 +5,8 @@ local GameSetup = module:hook_class("GameSetup")
 module:post_hook(50, GameSetup, "load_packages", function(self)
 	local level_id = Global.game_settings.level_id or "bank"
 	if next(tweak_data.levels[level_id].environment_effects or {}) then
-		if not PackageManager:loaded("packages/level_bridge") then
-			PackageManager:load("packages/level_bridge")
+		if not PackageManager:loaded("packages/rain_effect") then
+			PackageManager:load("packages/rain_effect")
 		end
 	end
 end)
