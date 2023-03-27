@@ -85,7 +85,7 @@ module:post_hook(50, GameSetup, "unload_packages", function(self)
 		"levels/slaughterhouse/world",
 		"levels/street/world",
 		"levels/suburbia/world",
-		"packages/level_bridge",
+		"packages/rain_effect",
 	}) do
 		if PackageManager:loaded(package) then
 			PackageManager:unload(package)
