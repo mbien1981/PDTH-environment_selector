@@ -24,8 +24,11 @@ local levels = {
 local level_names = {
 	english = {
 		["bank"] = "First World Bank",
+		["pd2_bank_trailer"] = "PD2 Trailer Bank",
 		["heat_street"] = "Heat Street",
+		["heat_street_v1"] = "Heat Street V1",
 		["apartment"] = "Panic Room",
+		["apartment_v1"] = "Panic Room V1",
 		["bridge"] = "Green Bridge",
 		["diamond_heist"] = "Diamond Heist",
 		["slaughter_house"] = "Slaughter House",
@@ -45,6 +48,16 @@ local level_names = {
 		["hospital"] = "No Mercy",
 	},
 }
+
+module:add_localization_string("es_loc_pd2_bank_trailer_environment", {
+	english = string.format("%s Environment", level_names["english"]["pd2_bank_trailer"]),
+})
+module:add_localization_string("es_loc_apartment_v1_environment", {
+	english = string.format("%s Environment", level_names["english"]["apartment_v1"]),
+})
+module:add_localization_string("es_loc_heat_street_v1_environment", {
+	english = string.format("%s Environment", level_names["english"]["heat_street_v1"]),
+})
 
 for _, level in pairs(levels) do
 	module:add_localization_string("es_loc_" .. level .. "_environment", {
