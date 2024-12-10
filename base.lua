@@ -1,6 +1,6 @@
 return DMod:new("environment_selector", {
 	name = "Environment selector",
-	version = "2.0",
+	version = "2.1",
 	author = "Dr_Newbie, Whurr, _atom",
 	includes = {
 		{ "mod_localization", { type = "localization" } },
@@ -78,9 +78,9 @@ return DMod:new("environment_selector", {
 					if type(env_data) ~= "function" then
 						return
 					end
-
+					
 					env_data = env_data(cubemaps[level_id])
-
+					
 					-- Not the best way to achieve this but allows us to avoid loading level packages and gives us the possibility of adding custom environments without access to custom assets.
 					-- Requires DAHM 1.16.1.5 or above.
 					tablex.deep_merge(data[2], env_data)
