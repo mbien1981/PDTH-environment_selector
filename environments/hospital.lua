@@ -6,6 +6,7 @@ return {
 			["_meta"] = "param",
 			["key"] = "rotation",
 		},
+		["_meta"] = "sky_orientation",
 	},
 	[2] = {
 		[1] = {
@@ -204,8 +205,7 @@ return {
 			["key"] = "flare_alpha_3",
 		},
 		[40] = {
-            -- vanilla uses core/textures/cubemap_default, thanks Whurr for the fix.
-			["value"] = global_texture or "environments/cubemaps/cubemap_hospital_01",
+			["value"] = global_texture or "core/textures/cubemap_default",
 			["_meta"] = "param",
 			["key"] = "global_texture",
 		},
@@ -219,7 +219,7 @@ return {
 			["_meta"] = "param",
 			["key"] = "flare_offset_2",
 		},
-
+		["_meta"] = "others",
 	},
 	[3] = {
 		[1] = {
@@ -260,9 +260,11 @@ return {
 						["_meta"] = "param",
 						["key"] = "slice2",
 					},
+					["_meta"] = "shadow_modifier",
 				},
-
+				["_meta"] = "shadow_rendering",
 			},
+			["_meta"] = "shadow_processor",
 		},
 		[2] = {
 			[1] = {
@@ -272,6 +274,7 @@ return {
 						["_meta"] = "param",
 						["key"] = "fadeout_blend",
 					},
+					["_meta"] = "shadow",
 				},
 				[2] = {
 					[1] = {
@@ -369,6 +372,7 @@ return {
 						["_meta"] = "param",
 						["key"] = "ambient_color",
 					},
+					["_meta"] = "apply_ambient",
 				},
 				[3] = {
 					[1] = {
@@ -376,6 +380,7 @@ return {
 						["_meta"] = "param",
 						["key"] = "intensity",
 					},
+					["_meta"] = "global_ssao",
 				},
 				[4] = {
 					[1] = {
@@ -383,6 +388,7 @@ return {
 						["_meta"] = "param",
 						["key"] = "intensity",
 					},
+					["_meta"] = "local_ssao",
 				},
 				[5] = {
 					[1] = {
@@ -390,8 +396,11 @@ return {
 						["_meta"] = "param",
 						["key"] = "intensity",
 					},
+					["_meta"] = "ssao",
 				},
+				["_meta"] = "deferred_lighting",
 			},
+			["_meta"] = "deferred",
 		},
 		[3] = {
 			[1] = {
@@ -421,6 +430,7 @@ return {
 						["_meta"] = "param",
 						["key"] = "clamp",
 					},
+					["_meta"] = "dof",
 				},
 				[2] = {
 					["_meta"] = "soften",
@@ -462,6 +472,7 @@ return {
 						["_meta"] = "param",
 						["key"] = "$template_mix",
 					},
+					["_meta"] = "tone_mapping",
 				},
 				[6] = {
 					[1] = {
@@ -484,6 +495,7 @@ return {
 						["_meta"] = "param",
 						["key"] = "middle_grey",
 					},
+					["_meta"] = "bloom_brightpass",
 				},
 				[7] = {
 					[1] = {
@@ -491,6 +503,7 @@ return {
 						["_meta"] = "param",
 						["key"] = "opacity",
 					},
+					["_meta"] = "bloom_apply",
 				},
 				[8] = {
 					[1] = {
@@ -498,8 +511,11 @@ return {
 						["_meta"] = "param",
 						["key"] = "disable_tone_mapping",
 					},
+					["_meta"] = "exposure_sepia_levels",
 				},
+				["_meta"] = "default",
 			},
+			["_meta"] = "hdr_post_processor",
 		},
 		[4] = {
 			[1] = {
@@ -574,10 +590,13 @@ return {
 						["_meta"] = "param",
 						["key"] = "color0_scale",
 					},
+					["_meta"] = "fog",
 				},
-
+				["_meta"] = "fog",
 			},
+			["_meta"] = "fog_processor",
 		},
+		["_meta"] = "post_effect",
 	},
 	[4] = {
 		[1] = {
@@ -586,6 +605,7 @@ return {
 				["_meta"] = "param",
 				["key"] = "sky_intensity",
 			},
+			["_meta"] = "sky_top",
 		},
 		[2] = {
 			[1] = {
@@ -598,6 +618,7 @@ return {
 				["_meta"] = "param",
 				["key"] = "sun_color",
 			},
+			["_meta"] = "sun",
 		},
 		[3] = {
 			[1] = {
@@ -630,6 +651,7 @@ return {
 				["_meta"] = "param",
 				["key"] = "color0_scale",
 			},
+			["_meta"] = "sky",
 		},
 		[4] = {
 			[1] = {
@@ -677,6 +699,7 @@ return {
 				["_meta"] = "param",
 				["key"] = "alpha_scale_sun",
 			},
+			["_meta"] = "cloud_overlay",
 		},
 		[5] = {
 			[1] = {
@@ -684,6 +707,9 @@ return {
 				["_meta"] = "param",
 				["key"] = "sky_intensity",
 			},
+			["_meta"] = "sky_bottom",
 		},
+		["_meta"] = "underlay_effect",
 	},
+	["_meta"] = "data",
 }
