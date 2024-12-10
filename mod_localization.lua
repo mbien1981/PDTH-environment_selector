@@ -25,6 +25,7 @@ local level_names = {
 	english = {
 		["bank"] = "First World Bank",
 		["pd2_bank_trailer"] = "PD2 Trailer Bank",
+		["pd2_bank_trailer_alt"] = "PD2 Trailer Bank Alt",
 		["heat_street"] = "Heat Street",
 		["heat_street_v1"] = "Heat Street V1",
 		["apartment"] = "Panic Room",
@@ -51,6 +52,9 @@ local level_names = {
 
 module:add_localization_string("es_loc_pd2_bank_trailer_environment", {
 	english = string.format("%s Environment", level_names["english"]["pd2_bank_trailer"]),
+})
+module:add_localization_string("es_loc_pd2_bank_trailer_alt_environment", {
+	english = string.format("%s Environment", level_names["english"]["pd2_bank_trailer_alt"]),
 })
 module:add_localization_string("es_loc_apartment_v1_environment", {
 	english = string.format("%s Environment", level_names["english"]["apartment_v1"]),

@@ -26,6 +26,7 @@ for _, level in pairs(levels) do
 			{ "random", "es_loc_random_environment" },
 			{ "bank", "es_loc_bank_environment" },
 			{ "pd2_bank_trailer", "es_loc_pd2_bank_trailer_environment" },
+			{ "pd2_bank_trailer_alt", "es_loc_pd2_bank_trailer_alt_environment" },
 			{ "heat_street", "es_loc_heat_street_environment" },
 			{ "heat_street_v1", "es_loc_heat_street_v1_environment" },
 			{ "apartment", "es_loc_apartment_environment" },
