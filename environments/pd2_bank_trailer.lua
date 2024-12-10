@@ -1,3 +1,6 @@
+-- values taken from Whurr's PD2 Trailer Bank environment for First World Bank mod
+-- https://modworkshop.net/mod/34809
+
 local global_texture = ...
 return {
 	[1] = {

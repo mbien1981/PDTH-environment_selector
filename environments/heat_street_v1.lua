@@ -1,3 +1,6 @@
+-- values taken from Whurr's Heat Street v1 Environment mod
+-- https://modworkshop.net/mod/28220
+
 local global_texture = ...
 return {
 	[1] = {

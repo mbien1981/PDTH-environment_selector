@@ -1,3 +1,6 @@
+-- values taken from Whurr's Panic Room V1 Environment mod
+-- https://modworkshop.net/mod/32555
+
 local global_texture = ...
 return {
 	[1] = {
