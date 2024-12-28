@@ -1,6 +1,7 @@
 return DMod:new("environment_selector", {
 	name = "Environment selector",
-	version = "2.1",
+	abbr = "ENVSEL",
+	version = "2.2",
 	author = "Dr_Newbie, Whurr, _atom",
 	includes = {
 		{ "mod_localization", { type = "localization" } },
@@ -27,6 +28,11 @@ return DMod:new("environment_selector", {
 					return
 				end
 
+				local environment = D:conf("environment_selector_" .. level_id)
+				if not environment or environment == "default" then
+					return
+				end
+
 				local environments = {
 					apartment = "environments/env_apartment/env_apartment",
 					bank = "environments/env_bank/env_bank",
@@ -50,36 +56,29 @@ return DMod:new("environment_selector", {
 					suburbia = "environments/cubemaps/cubemap_suburbia_01",
 				}
 
-				local environment = D:conf("environment_selector_" .. level_id) or "bank"
-				if environment == "default" then
-					return
-				end
-
 				local path = level_id and environments[level_id]
 				if not path then
 					return
 				end
 
-				local environment_list = {
-					"bank",
-					"pd2_bank_trailer",
-					"heat_street",
-					"heat_street_v1",
-					"apartment",
-					"apartment_v1",
-					"bridge",
-					"diamond_heist",
-					"slaughter_house",
-					"suburbia",
-					"secret_stash",
-					"hospital",
-				}
-
 				if environment == "random" then
-					environment = environment_list[math.random(1, #environment_list)] or "bank"
+					environment = table.random({
+						"bank",
+						"pd2_bank_trailer",
+						"heat_street",
+						"heat_street_v1",
+						"apartment",
+						"apartment_v1",
+						"bridge",
+						"diamond_heist",
+						"slaughter_house",
+						"suburbia",
+						"secret_stash",
+						"hospital",
+					})
 				end
 
-				if environment == level_id then
+				if not environment or environment == level_id then
 					return
 				end
 
@@ -89,9 +88,9 @@ return DMod:new("environment_selector", {
 					if type(env_data) ~= "function" then
 						return
 					end
-					
+
 					env_data = env_data(cubemaps[level_id])
-					
+
 					-- Not the best way to achieve this but allows us to avoid loading level packages and gives us the possibility of adding custom environments without access to custom assets.
 					-- Requires DAHM 1.16.1.5 or above.
 					tablex.deep_merge(data[2], env_data)
