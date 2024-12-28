@@ -8,6 +8,17 @@ return DMod:new("environment_selector", {
 	},
 	hooks = {
 		{
+			"OnModuleRegistered",
+			"OnModuleRegistered_ESCheckDAHMVersion",
+			function(module)
+				if D:version() >= "1.16.1.5" then
+					return
+				end
+
+				module:set_state("disabled")
+			end,
+		},
+		{
 			"OnModuleLoading",
 			"override_environment_data",
 			function(module)
