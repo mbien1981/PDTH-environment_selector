@@ -1,6 +1,6 @@
 # Requirements
 * [DAHM/DorHUD](https://steamcommunity.com/groups/dahm4pd/discussions/3/600787749709172066/) v1.16.1.5 or above.
-- [mod_overrides and DB:create_entry for PAYDAY: The Heist v2.1 or above](https://modworkshop.net/mod/53474)
+- [mod_overrides and DB:create_entry for PAYDAY: The Heist v2.2 or above](https://modworkshop.net/mod/53474)
 
 # Installation
 Drop the `environment_selector` folder inside your `mods/` directory.
