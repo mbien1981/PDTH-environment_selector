@@ -12,5 +12,5 @@ Access the game options menu, then enter the "Mods" sub-menu and click on "Envir
 * [Dr_Newbie](https://modworkshop.net/user/7573/) - for the [Day Night Changer](https://modworkshop.net/mod/25740/) mod that served as a base for this mod.
 * [Whurr](https://modworkshop.net/user/whurr/) - NM and UC cubemap fixes, HS and PR v1 environments, PD2 Bank Trailer and Alpha Ukrainian Job environments.
 * [Little Jimmy](https://steamcommunity.com/profiles/76561198151485865/) - Testing and French localization
-* [Little Jimmy](https://steamcommunity.com/profiles/76561198844370238/) - German localization
+* [neonsynth](https://steamcommunity.com/profiles/76561198844370238/) - German localization
 * [Sergeant Panda](https://steamcommunity.com/profiles/76561198051599750/) - Testing
