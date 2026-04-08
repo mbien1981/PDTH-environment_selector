@@ -3,7 +3,10 @@ local assets_directory = ModPath .. "assets/"
 local EnvironmentLoader = {}
 EnvironmentLoader.assets_dir = assets_directory
 EnvironmentLoader.custom_assets_dir = "custom environments/"
-EnvironmentLoader.rain_package = "packages/rain_effect"
+EnvironmentLoader.packages = {
+	environment_selector = "packages/environment_selector",
+	rain = "packages/rain_effect",
+}
 EnvironmentLoader.choices = {}
 
 function EnvironmentLoader:get_random_environment(m, excluded_key)
@@ -39,35 +42,28 @@ function EnvironmentLoader:get_environment(m, level_id)
 end
 
 function EnvironmentLoader:get_weather(m, level_id)
-	local selected_weather = m:conf(level_id .. "_rain_and_lightnings") or "none"
+	local setting = m:conf(level_id .. "_rain_and_lightnings") or "none"
 
-	local rain, lightnings = false, false
-	if selected_weather == "rainy" then
-		rain = true
+	local rain = setting == "rainy" or setting == "thunderstorm"
+	local lightning = setting == "thunderstorm"
+	local snow = setting == "snowy"
+
+	if setting == "random_rain" or setting == "random_thunderstorm" then
+		rain = math.random() > 0.5
+		self:debug_print_weather_roll(m, level_id, "rain", rain, setting)
 	end
 
-	if selected_weather == "thunderstorm" then
-		rain = true
-		lightnings = true
+	if setting == "random_thunderstorm" then
+		lightning = math.random() > 0.5
+		self:debug_print_weather_roll(m, level_id, "lightning", lightning, setting)
 	end
 
-	local rain_chance = math.random() > 0.5
-	local lightning_chance = math.random() > 0.5
-	if selected_weather == "random_rain" then
-		rain = rain_chance
-
-		self:debug_print_weather_roll(m, level_id, "rain", rain_chance, selected_weather)
+	if setting == "random_snow" then
+		snow = math.random() > 0.5
+		self:debug_print_weather_roll(m, level_id, "snow", snow, setting)
 	end
 
-	if selected_weather == "random_thunderstorm" then
-		rain = rain_chance
-		lightnings = lightning_chance
-
-		self:debug_print_weather_roll(m, level_id, "rain", rain_chance, selected_weather)
-		self:debug_print_weather_roll(m, level_id, "lightning", lightning_chance, selected_weather)
-	end
-
-	return rain, lightnings
+	return rain, lightning, snow
 end
 
 function EnvironmentLoader:on_config_changed(k, value)
@@ -81,6 +77,27 @@ function EnvironmentLoader:on_config_changed(k, value)
 
 		managers.viewport:preload_environment(environment)
 		managers.environment_area:set_default_environment(environment)
+		return
+	end
+
+	if level_id and k == "environment_selector_" .. level_id .. "_rain_and_lightnings" then
+		for _, effect in ipairs({ "rain", "raindrop_screen", "lightning", "snow" }) do
+			managers.environment_effects:stop(effect)
+		end
+
+		local rain, lightnings, snow = EnvironmentLoader:get_weather(D:module("environment_selector"), level_id)
+		for effect, enabled in pairs({
+			["rain"] = rain,
+			["raindrop_screen"] = rain,
+			["lightning"] = lightnings,
+			["snow"] = snow,
+		}) do
+			if enabled then
+				managers.environment_effects:use(effect)
+			end
+		end
+
+		return
 	end
 end
 
@@ -165,8 +182,10 @@ function EnvironmentLoader:build_config()
 					{ "none", "loc_envsel_off" },
 					{ "rainy", "loc_envsel_rainy" },
 					{ "thunderstorm", "loc_envsel_thunderstorm" },
+					{ "snowy", "loc_envsel_snowy" },
 					{ "random_rain", "loc_envsel_random_rain" },
 					{ "random_thunderstorm", "loc_envsel_random_thunderstorm" },
+					{ "random_snow", "loc_envsel_random_snow" },
 				},
 				default_value = level_id == "bridge" and "thunderstorm" or "none",
 			},
@@ -220,12 +239,14 @@ function EnvironmentLoader:build_localization()
 		loc_envsel_environment = { english = "Level Environment", german = "Levelumgebung" },
 		loc_envsel_default_environment = { english = "Default Environment", german = "Standardumgebung" },
 		loc_envsel_random_environment = { english = "Random Environment", german = "Zufällige Umgebung" },
-		loc_envsel_rain_and_lightnings = { english = "Rain and Lightnings", german = "Regen und Blitze" },
+		loc_envsel_rain_and_lightnings = { english = "Weather", german = "Wetter" },
 		loc_envsel_off = { english = "Off", german = "Aus" },
 		loc_envsel_rainy = { english = "Rainy", german = "Regnerisch" },
 		loc_envsel_thunderstorm = { english = "Thunderstorm", german = "Gewitter" },
+		loc_envsel_snowy = { english = "Snowy", german = "Verschneit" },
 		loc_envsel_random_rain = { english = "Random Rain", german = "Zufälliger Regen" },
 		loc_envsel_random_thunderstorm = { english = "Random Thunderstorm", german = "Zufälliges Gewitter" },
+		loc_envsel_random_snow = { english = "Random Snow", german = "Zufälliger Schnee" },
 		loc_envsel_select_random_candidates = {
 			english = "Select random environment candidates",
 			german = "Wähle zufällige Umgebungskandidaten aus",
@@ -260,88 +281,107 @@ function EnvironmentLoader:load_meta(meta_path)
 	return data and data()
 end
 
-function EnvironmentLoader:register_entry(entry_type, id, localization, physical_path, virtual_path)
-	if not osx.file_exists(physical_path) then
-		dlog("ERROR: ENVSEL - find file for environment " .. id)
+function EnvironmentLoader:register_entry(ext, id, localization, file_path, entry_path)
+	if not osx.file_exists(file_path) then
+		dlog("ERROR: ENVSEL - find " .. ext .. " file for " .. entry_path)
 		return
 	end
 
 	table.insert(self.pending_entries, {
-		entry_type = entry_type,
-		virtual_path = virtual_path,
-		physical_path = physical_path,
+		ext = ext,
+		entry_path = entry_path,
+		file_path = file_path,
 	})
 
-	if entry_type == "environment" then
-		dlog("ENVSEL - create env entry " .. virtual_path)
-		self.assets_paths[id] = virtual_path
+	if ext == "environment" then
+		self.assets_paths[id] = entry_path
 		table.insert(self.choices, id)
 
 		self._custom_localization["loc_envsel_" .. id .. "_env"] = localization
 	end
 end
 
-function EnvironmentLoader:scan_main_assets()
-	local package_path = self.assets_dir .. "environment_selector.package"
-	if not osx.file_exists(package_path) then
-		dlog("ERORR: ENVSEL - PACKAGE FOR ENVIRONMENT SELECTOR IS MISSING!")
-		return
-	end
-
-	local meta = self:load_meta(self.assets_dir .. "meta.lua")
+function EnvironmentLoader:_register_environment_entries(meta, base_path, entry_suffix)
 	if type(meta) ~= "table" then
 		return
 	end
 
-	local entry_suffix = "environments/environment_selector/"
 	for _, entry in ipairs(meta) do
 		if type(entry) == "table" and entry.id and entry.environment then
+			local ext = "environment"
 			local locale = entry.localization or entry.name or entry.id
-			self:register_entry(
-				"environment",
-				entry.id,
-				locale,
-				self.assets_dir .. entry.environment,
-				entry_suffix .. entry.id
-			)
+			local asset_path = base_path .. entry.environment
+			local entry_path = entry_suffix .. entry.id
+
+			self:register_entry(ext, entry.id, locale, asset_path, entry_path)
 		end
 	end
-
-	self:register_entry("package", nil, nil, package_path, "packages/environment_selector")
 end
 
-function EnvironmentLoader:scan_custom_assets()
+function EnvironmentLoader:scan_included_environments()
+	local entry_suffix = "environments/environment_selector/"
+	local meta = self:load_meta(self.assets_dir .. "meta.lua")
+
+	self:_register_environment_entries(meta, self.assets_dir, entry_suffix)
+end
+
+function EnvironmentLoader:scan_custom_environments()
 	local entry_suffix = "environments/environment_selector/custom/"
+
 	for folder in pairs(osx.get_directories(self.custom_assets_dir)) do
 		local folder_id = folder:gsub("/$", "")
 		local base_path = self.custom_assets_dir .. folder_id .. "/"
-		local package_path = base_path .. folder_id .. ".package"
+		local meta = self:load_meta(base_path .. "meta.lua")
 
-		if osx.file_exists(package_path) then
-			local meta = self:load_meta(base_path .. "meta.lua")
-			if type(meta) == "table" then
-				for _, entry in ipairs(meta) do
-					if type(entry) == "table" and entry.id and entry.environment then
-						local locale = entry.localization or entry.name or entry.id
-						self:register_entry(
-							"environment",
-							entry.id,
-							locale,
-							base_path .. entry.environment,
-							entry_suffix .. entry.id
-						)
-					end
-				end
+		self:_register_environment_entries(meta, base_path, entry_suffix)
+	end
+end
 
-				local package_entry = "packages/environment_selector/" .. folder_id
-				self:register_entry("package", nil, nil, package_path, package_entry)
+function EnvironmentLoader:load_snow_assets()
+	local assets = {
+		{ "texture", "effects/textures/debris/e_snow_flakes_2x2", "snow/e_snow_flakes_2x2" },
+		{ "texture", "effects/textures/debris/e_snow_flakes_2x2_blur", "snow/e_snow_flakes_2x2_blur" },
+		{ "texture", "effects/textures/debris/e_snow_flakes_2x2_less_blur", "snow/e_snow_flakes_2x2_less_blur" },
+		{ "texture", "effects/textures/effects_atlas", "snow/effects_atlas" },
+		{ "effect", "effects/particles/snow/snow_01", "snow/snow_01" },
+	}
 
-				table.insert(self.custom_packages, package_entry)
-			end
-		else
-			dlog("ERROR: ENVSEL - Couldn't find a package for " .. folder)
+	for _, asset in ipairs(assets) do
+		local file_path = self.assets_dir .. asset[3] .. "." .. asset[1]
+		self:register_entry(asset[1], nil, nil, file_path, asset[2])
+	end
+end
+
+local package_extensions = { environment = true, effect = true }
+function EnvironmentLoader:build_package_xml()
+	local lines = { "<package>", "\t<resources>" }
+
+	for _, entry in ipairs(self.pending_entries) do
+		local ext = entry.ext
+		local path = entry.entry_path
+
+		if package_extensions[ext] and DB:has(ext, path) then
+			table.insert(lines, string.format('\t\t<%s name="%s" />', ext, path))
 		end
 	end
+
+	table.insert(lines, "\t</resources>")
+	table.insert(lines, "</package>")
+
+	return table.concat(lines, "\n")
+end
+
+function EnvironmentLoader:create_package()
+	local file_path = self.assets_dir .. "environment_selector.package"
+	local file = io.open(file_path, "w")
+	if not file then
+		return
+	end
+
+	file:write(self:build_package_xml())
+	file:close()
+
+	self:register_entry("package", nil, nil, file_path, self.packages.environment_selector)
 end
 
 function EnvironmentLoader:scan_for_assets()
@@ -350,45 +390,37 @@ function EnvironmentLoader:scan_for_assets()
 	self.custom_packages = {}
 	self._custom_localization = self._custom_localization or {}
 
-	self:scan_main_assets()
-	self:scan_custom_assets()
+	self:load_snow_assets()
+	self:scan_included_environments()
+	self:scan_custom_environments()
+	self:create_package()
 end
 
 function EnvironmentLoader:create_db_entries()
 	for _, entry in ipairs(self.pending_entries) do
-		DB:create_entry(entry.entry_type, entry.virtual_path, entry.physical_path)
+		DB:create_entry(entry.ext, entry.entry_path, entry.file_path)
 	end
 end
 
 function EnvironmentLoader:load_packages()
-	if not DB:has("package", "packages/environment_selector") then
-		return
+	local env_package = self.packages.environment_selector
+	if DB:has("package", env_package) and not PackageManager:loaded(env_package) then
+		PackageManager:load(env_package)
 	end
 
-	if not PackageManager:loaded("packages/environment_selector") then
-		PackageManager:load("packages/environment_selector")
-	end
-
-	for _, package in ipairs(self.custom_packages) do
-		if DB:has("package", package) and not PackageManager:loaded(package) then
-			PackageManager:load(package)
-		end
+	if not PackageManager:loaded(self.packages.rain) then
+		PackageManager:load(self.packages.rain)
 	end
 end
 
 function EnvironmentLoader:unload_packages()
-	if not DB:has("package", "packages/environment_selector") then
-		return
+	local env_package = self.packages.environment_selector
+	if DB:has("package", env_package) and PackageManager:loaded(env_package) then
+		PackageManager:unload(env_package)
 	end
 
-	if PackageManager:loaded("packages/environment_selector") then
-		PackageManager:unload("packages/environment_selector")
-	end
-
-	for _, package in ipairs(self.custom_packages) do
-		if DB:has("package", package) and PackageManager:loaded(package) then
-			PackageManager:unload(package)
-		end
+	if PackageManager:loaded(self.packages.rain) then
+		PackageManager:unload(self.packages.rain)
 	end
 end
 
@@ -401,6 +433,10 @@ return DMod:new("environment_selector", {
 	abbr = "ENVSEL",
 	config_prefix = "environment_selector",
 	config = EnvironmentLoader:build_config(),
+	default_menu_option_callback = function(k, value, old_value, old_value_was_user_set, o, item)
+		EnvironmentLoader:on_config_changed(k, value)
+		return true
+	end,
 	localization = EnvironmentLoader:build_localization(),
 	hooks = {
 		["lib/setups/setup"] = function(module)
@@ -409,18 +445,10 @@ return DMod:new("environment_selector", {
 		["lib/setups/gamesetup"] = function(module)
 			module:post_hook(50, GameSetup, "load_packages", function(self)
 				EnvironmentLoader:load_packages()
-
-				if not PackageManager:loaded(EnvironmentLoader.rain_package) then
-					PackageManager:load(EnvironmentLoader.rain_package)
-				end
 			end)
 
 			module:post_hook(50, GameSetup, "unload_packages", function(self)
 				EnvironmentLoader:unload_packages()
-
-				if PackageManager:loaded(EnvironmentLoader.rain_package) then
-					PackageManager:unload(EnvironmentLoader.rain_package)
-				end
 			end)
 		end,
 		["lib/tweak_data/levelstweakdata"] = function(module)
@@ -428,12 +456,13 @@ return DMod:new("environment_selector", {
 				for _, level_id in pairs(self._level_index) do
 					local heist_effects = {}
 
-					local rain, lightnings = EnvironmentLoader:get_weather(module, level_id)
+					local rain, lightnings, snow = EnvironmentLoader:get_weather(module, level_id)
 
 					local effect_list = {
 						["rain"] = rain,
 						["raindrop_screen"] = rain,
 						["lightning"] = lightnings,
+						["snow"] = snow,
 					}
 
 					for effect, enabled in pairs(effect_list) do
@@ -458,9 +487,36 @@ return DMod:new("environment_selector", {
 				data.environment_values.environment = selected_environment
 			end)
 		end,
+		["core/lib/utils/dev/tools/particle_editor/coreparticleeditorinitializers"] = function(module)
+			local CoreParticleEditorInitializers = module:hook_module_class("CoreParticleEditorInitializers")
+			module:hook(CoreParticleEditorInitializers, "create_boxevenposition", function(self)
+				local initializer = CoreEffectStackMember:new("boxevenposition", "initializer", "")
+
+				local p = CoreEffectProperty:new("relative", "value_list", "effect", "")
+
+				p:add_value("effect")
+				p:add_value("world")
+				initializer:add_property(p)
+
+				p = CoreEffectProperty:new("box", "box", "", "")
+				p:set_min_max(Vector3(-1, -1, -1), Vector3(1, 1, 1))
+				initializer:add_property(p)
+
+				return initializer
+			end)
+		end,
+		["lib/managers/environmenteffectsmanager"] = function(module)
+			local EnvironmentEffectsManager = module:hook_class("EnvironmentEffectsManager")
+			module:post_hook(EnvironmentEffectsManager, "init", function(self)
+				self:add_effect("snow", RainEffect:new(Idstring("effects/particles/snow/snow_01")))
+			end)
+
+			local EnvironmentEffect = module:hook_class("EnvironmentEffect")
+			local RainEffect = module:hook_class("RainEffect")
+			module:hook(RainEffect, "init", function(self, effect_name)
+				EnvironmentEffect.init(self)
+				self._effect_name = effect_name or Idstring("effects/particles/rain/rain_01_a")
+			end)
+		end,
 	},
-	default_menu_option_callback = function(k, value, old_value, old_value_was_user_set, o, item)
-		EnvironmentLoader:on_config_changed(k, value)
-		return true
-	end,
 })
