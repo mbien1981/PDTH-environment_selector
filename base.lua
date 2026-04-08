@@ -428,7 +428,7 @@ EnvironmentLoader:scan_for_assets()
 
 return DMod:new("environment_selector", {
 	name = "Environment Selector",
-	version = "3.0",
+	version = "3.1",
 	author = "Dr_Newbie, _atom",
 	abbr = "ENVSEL",
 	config_prefix = "environment_selector",
