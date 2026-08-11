@@ -428,7 +428,7 @@ EnvironmentLoader:scan_for_assets()
 
 return DMod:new("environment_selector", {
 	name = "Environment Selector",
-	version = "3.1",
+	version = "3.2",
 	author = "Dr_Newbie, _atom",
 	abbr = "ENVSEL",
 	config_prefix = "environment_selector",
@@ -512,10 +512,42 @@ return DMod:new("environment_selector", {
 			end)
 
 			local EnvironmentEffect = module:hook_class("EnvironmentEffect")
+
+			local ids_rain_effect = Idstring("effects/particles/rain/rain_01_a")
 			local RainEffect = module:hook_class("RainEffect")
 			module:hook(RainEffect, "init", function(self, effect_name)
 				EnvironmentEffect.init(self)
-				self._effect_name = effect_name or Idstring("effects/particles/rain/rain_01_a")
+				self._effect_name = effect_name or ids_rain_effect
+			end)
+
+			local ids_streaks = Idstring("streaks")
+			local ids_ripples = Idstring("streaks_rain")
+
+			module:hook(RainEffect, "update", function(self, t, dt)
+				if self._effect_name == ids_rain_effect then
+					local vp = managers.viewport:first_active_viewport()
+					if vp and self._vp ~= vp then
+						vp:vp():set_post_processor_effect("World", ids_streaks, ids_ripples)
+
+						if alive(self._vp) then
+							self._vp:vp():set_post_processor_effect("World", ids_streaks, ids_streaks)
+						end
+
+						self._vp = vp
+					end
+				end
+
+				local c_rot = managers.environment_effects:camera_rotation()
+				if not c_rot then
+					return
+				end
+
+				local c_pos = managers.environment_effects:camera_position()
+				if not c_pos then
+					return
+				end
+
+				World:effect_manager():move_rotate(self._effect, c_pos, c_rot)
 			end)
 		end,
 	},
